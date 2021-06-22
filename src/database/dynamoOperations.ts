@@ -46,8 +46,12 @@ class MemberDao implements IMemberObject {
     }
 
     const data = await ddbClient.send(new GetItemCommand(params));
-    console.log("Success", data.Item);
-    return data.Item as Member;
+    if(data.Item === undefined) {
+      console.log("No member found!")
+    } else {
+      console.log("Success", data.Item);
+      return data.Item as Member;
+    }
   }
 
   //Add or Update a member
@@ -89,11 +93,7 @@ class MemberDao implements IMemberObject {
     }
 
     const data = await ddbClient.send(new DeleteItemCommand(params));
-    if(!data) {
-      console.log("Member ID already does not exist.");
-    } else {
-      console.log("Success, member deleted!");
-    }
+    console.log(`Success, member ${id} deleted!`);
   }
 
 }

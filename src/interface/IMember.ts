@@ -1,3 +1,4 @@
+//Interface binds object to define all properties as specified
 export interface IMember {
     id?: string;
     first_name?: string;
@@ -7,7 +8,7 @@ export interface IMember {
     rewards?: string;
 }
 
-
+//Member class implementing IMember interface
 class Member implements IMember {
 
     constructor(
