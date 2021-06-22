@@ -1,86 +1,101 @@
 
 // Import required AWS SDK clients and commands for Node.js
-import { ScanCommand, PutItemCommand, DeleteItemCommand } from "@aws-sdk/client-dynamodb";
-import { ddbClient } from './dynamoClient';
-import { GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
+import { ScanCommand, GetItemCommand, PutItemCommand, DeleteItemCommand, DynamoDBClient} from "@aws-sdk/client-dynamodb";
 import * as AWS from 'aws-sdk';
-import { ddbDocClient } from './dynamoDocClient';
+import IMember from '../interface/IMember';
 import Member from '../interface/IMember';
-import 'dotenv/config'
+import 'dotenv/config';
 
-const TABLE_NAME = "cookieshopmembers-api";
-
+// Configuration to access DynamoDB database
 AWS.config.update({
   region: process.env.REGION,
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 });
 
-export default class MemberDao {
+const TABLE_NAME = "cookieshopAPI";
+const ddbClient = new DynamoDBClient({ region: process.env.region });
+
+//Interface binds object to define all properties as specified
+export interface IMemberObject {
+  getAllMembers: () => Promise<IMember[]>;
+  getOneMember: (id:string, email:string) => Promise<IMember | null >;
+  addOrUpdateMember: (member:IMember) => Promise<IMember | null >;
+  deleteMember: (id:string, email:string) => Promise<void>;
+}
+
+class MemberDao implements IMemberObject {
 
   //Get all members
-  public getAllMembers = async() => {
+  public async getAllMembers():Promise<IMember[]> {
     const params = {
       TableName: TABLE_NAME
-    }
+    };
 
-    try{
-      const data = await ddbClient.send(new ScanCommand(params));
-      return data.Items;
-    } catch (err) {
-      console.log("Error", err);
-    }
+    const data = await ddbClient.send(new ScanCommand(params));
+    return data.Items as Member[];
   };
 
   //Get one member by ID
-  public getOneMember = async(id:string) => {
+  public async getOneMember(id:string):Promise<IMember | null >{
     const params = {
       TableName: TABLE_NAME,
       Key: {
-        'id': id,
+        id: { S: id },
       }
     }
-    try {
-      const data = await ddbDocClient.send(new GetCommand(params));
-      return data.Item;
-    } catch (err) {
-      console.log("Error", err);
-    }
+
+    const data = await ddbClient.send(new GetItemCommand(params));
+    console.log("Success", data.Item);
+    return data.Item as Member;
   }
 
-  //Add a member
-  public addMember = async(member: Member) => {
+  //Add or Update a member
+  public async addOrUpdateMember(member:IMember): Promise<IMember | null> {
+    const { id, first_name, last_name, email, memberSince, rewards } = member;
+
     const params = {
       TableName: TABLE_NAME,
-      Item: member,
+      Item: {
+        id: { S: id },
+        first_name: { S: first_name },
+        last_name: { S: last_name },
+        email: { S: email },
+        memberSince: { S: memberSince },
+        rewards: { S: rewards }
+      }
     }
-    try {
-      const data = await ddbClient.send(new PutCommand(params));
-      return data;
-    } catch (err) {
-      console.log("Error", err);
+
+    const body = {
+      TableName: TABLE_NAME,
+      Key: {
+        id: { S: id },
+      }
     }
+
+    await ddbClient.send(new PutItemCommand(params));
+    const newMember = await ddbClient.send(new GetItemCommand(body));
+    console.log("Success, member created!", newMember.Item);
+    return newMember.Item as Member;
   }
 
-  //Delete a member
-  public deleteMember = async(id) => {
+  //Delete a member by the ID
+  public async deleteMember(id: string): Promise<void> {
     const params = {
       TableName: TABLE_NAME,
       Key: {
-        id,
+        id: { S: id },
       }
     }
-    try {
-      const data = await ddbClient.send(new DeleteItemCommand(params));
-      console.log("Success, member deleted", data)
-      return data;
-    } catch (err) {
-      if (err && err.code === "ResourceNotFoundException") {
-        console.log("Error: Table not found");
-      } else if (err && err.code === "ResourceInUseException") {
-        console.log("Error: Table in use");
-      }
+
+    const data = await ddbClient.send(new DeleteItemCommand(params));
+    if(!data) {
+      console.log("Member ID already does not exist.");
+    } else {
+      console.log("Success, member deleted!");
     }
   }
 
 }
+
+export default MemberDao;

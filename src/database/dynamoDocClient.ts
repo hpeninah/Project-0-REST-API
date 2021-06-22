@@ -2,9 +2,6 @@ import { DynamoDBDocumentClient} from "@aws-sdk/lib-dynamodb";
 import { ddbClient } from './dynamoClient';
 import 'dotenv/config';
 
-// Set the AWS Region.
-const REGION = process.env.REGION; //e.g. "us-east-1"
-
 const marshallOptions = {
     // Whether to automatically convert empty strings, blobs, and sets to `null`.
     convertEmptyValues: false, // false, by default.
