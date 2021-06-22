@@ -19,3 +19,9 @@ export async function addMember(req :Request, res: Response) {
     return res.status(200).json({member});
 }
 
+export async function deleteMemberByID(req:Request, res:Response) {
+    const id = req.params.id;
+    const member = await memberObject.deleteMember(id);
+    return res.status(200).end();
+}
+

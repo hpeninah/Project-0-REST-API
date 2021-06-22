@@ -1,11 +1,11 @@
 
 // Import required AWS SDK clients and commands for Node.js
-import { ScanCommand } from "@aws-sdk/client-dynamodb";
+import { ScanCommand, PutItemCommand, DeleteItemCommand } from "@aws-sdk/client-dynamodb";
 import { ddbClient } from './dynamoClient';
 import { GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
 import * as AWS from 'aws-sdk';
 import { ddbDocClient } from './dynamoDocClient';
-import IMember from '../interface/IMember';
+import Member from '../interface/IMember';
 import 'dotenv/config'
 
 const TABLE_NAME = "cookieshopmembers-api";
@@ -49,19 +49,37 @@ export default class MemberDao {
   }
 
   //Add a member
-  public addMember = async(member) => {
+  public addMember = async(member: Member) => {
     const params = {
       TableName: TABLE_NAME,
       Item: member,
-      Key: {
-        id: member.id,
-      }
     }
     try {
       const data = await ddbClient.send(new PutCommand(params));
       return data;
     } catch (err) {
       console.log("Error", err);
+    }
+  }
+
+  //Delete a member
+  public deleteMember = async(id) => {
+    const params = {
+      TableName: TABLE_NAME,
+      Key: {
+        id,
+      }
+    }
+    try {
+      const data = await ddbClient.send(new DeleteItemCommand(params));
+      console.log("Success, member deleted", data)
+      return data;
+    } catch (err) {
+      if (err && err.code === "ResourceNotFoundException") {
+        console.log("Error: Table not found");
+      } else if (err && err.code === "ResourceInUseException") {
+        console.log("Error: Table in use");
+      }
     }
   }
 
