@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "npm run build && nodemon ./dist/app",
-    "test": "jest"
+    "test": "echo 'No testing available at this time'"
   },
   "author": "Hannah Mulato",
   "license": "ISC",

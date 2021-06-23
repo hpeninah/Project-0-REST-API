@@ -56,7 +56,7 @@ class MemberDao implements IMemberObject {
 
   //Add or Update a member
   public async addOrUpdateMember(member:IMember): Promise<IMember | null> {
-    const { id, first_name, last_name, email, memberSince, rewards } = member;
+    const { id, first_name, last_name, email, memberSince, rewards, favoriteCookie } = member;
 
     const params = {
       TableName: TABLE_NAME,
@@ -66,7 +66,8 @@ class MemberDao implements IMemberObject {
         last_name: { S: last_name },
         email: { S: email },
         memberSince: { S: memberSince },
-        rewards: { S: rewards }
+        rewards: { S: rewards },
+        favoriteCookie: { S: favoriteCookie }
       }
     }
 
@@ -79,7 +80,7 @@ class MemberDao implements IMemberObject {
 
     await ddbClient.send(new PutItemCommand(params));
     const newMember = await ddbClient.send(new GetItemCommand(body));
-    console.log("Success, member created!", newMember.Item);
+    console.log("Success, member created/updated!", newMember.Item);
     return newMember.Item as Member;
   }
 

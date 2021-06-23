@@ -6,6 +6,7 @@ export interface IMember {
     email?: string;
     memberSince?: string;
     rewards?: string;
+    favoriteCookie?: string;
 }
 
 //Member class implementing IMember interface
@@ -18,6 +19,7 @@ class Member implements IMember {
         public email?: string,
         public memberSince?: string,
         public rewards?: string,
+        public favoriteCookie?: string,
         ){}
 }
 
