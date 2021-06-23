@@ -19,7 +19,7 @@ class Member implements IMember {
         public email?: string,
         public memberSince?: string,
         public rewards?: string,
-        public favoriteCookie?: string,
+        public favoriteCookie?:string
         ){}
 }
 

@@ -5,6 +5,7 @@ const memberRouter = Router();
 memberRouter.get('/', getAllMembers);
 memberRouter.post('/', addOrUpdateMember);
 memberRouter.put('/', addOrUpdateMember);
+
 memberRouter.get('/:id', getMemberByID);
 memberRouter.delete('/:id', deleteMemberByID);
 

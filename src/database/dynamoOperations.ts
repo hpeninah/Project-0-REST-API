@@ -67,7 +67,7 @@ class MemberDao implements IMemberObject {
         email: { S: email },
         memberSince: { S: memberSince },
         rewards: { S: rewards },
-        favoriteCookie: { S: favoriteCookie }
+        favoriteCookie: { S: favoriteCookie },
       }
     }
 
